@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  server:
+    image: node
+    container_name: jexpert-docker
+    restart: always
+    working_dir: /data/app/
+    command: bash -c "npm i && npm run live-reload"
+    stdin_open: true
+    tty: true
+    environment:
+      CHOKIDAR_USEPOLLING: 'true'
+      CHOKIDAR_INTERVAL: 300
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/data/app
+      - /data/app/node_modules
