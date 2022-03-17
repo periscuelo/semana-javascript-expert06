@@ -34,6 +34,16 @@ config.constants = {
         '.html': 'text/html',
         '.css': 'text/css',
         '.js': 'text/javascript'
+    },
+    RETENTION_DATA_PERIOD: 200,
+    audioMediaType: 'mp3',
+    songVolume: '0.99',
+    fallbackBitRate: '128000',
+    bitRateDivisor: 8,
+    englishConversation: join(songsDir, 'conversation.mp3'),
+    possibleCommands: {
+        start: 'start',
+        stop: 'stop'
     }
 }
 

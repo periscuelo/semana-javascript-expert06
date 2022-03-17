@@ -10,9 +10,11 @@
     "test": "LOG_DISABLED=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache",
     "test:watch": "LOG_DISABLED=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache --watchAll",
     "test:coverage": "LOG_DISABLED=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache --coverage tests/unit",
-    "docker:test": "docker exec -it jexpert-docker npm test",
-    "docker:watch": "docker exec -it jexpert-docker npm run test:watch",
-    "docker:coverage": "docker exec -it jexpert-docker npm run test:coverage"
+    "test:e2e": "LOG_DISABLED=true NODE_OPTIONS=--experimental-vm-modules jest --no-cache tests/e2e",
+    "docker:test": "docker exec -it jsexpert-docker npm test",
+    "docker:watch": "docker exec -it jsexpert-docker npm run test:watch",
+    "docker:coverage": "docker exec -it jsexpert-docker npm run test:coverage",
+    "docker:e2e": "docker exec -it jsexpert-docker npm run test:e2e"
   },
   "engines": {
     "node": "17"
@@ -22,10 +24,13 @@
   "license": "ISC",
   "devDependencies": {
     "jest": "^27.5.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "portfinder": "^1.0.28",
+    "supertest": "^6.2.2"
   },
   "dependencies": {
     "pino": "^7.8.1",
-    "pino-pretty": "^7.5.3"
+    "pino-pretty": "^7.5.3",
+    "throttle": "^1.0.3"
   }
 }
