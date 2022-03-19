@@ -28,11 +28,13 @@ const commandRes = JSON.stringify({ result: 'ok' })
 describe('API E2E Suite Test', () => {
     test('GET /unknown - given an unknown route it should respond with 404 status code', async () => {
         const response = await mocks.testServer.get(`/unknown`)
+
         expect(response.statusCode).toStrictEqual(404)
     })
 
     test('GET / - it should respond with the home location and 302 status code', async () => {
         const response = await mocks.testServer.get('/')
+
         expect(response.headers.location).toStrictEqual("/home");
         expect(response.statusCode).toStrictEqual(302)
     })
@@ -40,12 +42,14 @@ describe('API E2E Suite Test', () => {
     test('GET /home - it should respond with file stream', async () => {
         const response = await mocks.testServer.get('/home')
         const homePage = await fs.promises.readFile(`${publicDir}/${homeHTML}`)
+
         expect(response.text).toStrictEqual(homePage.toString())
     })
 
     test('GET /controller - it should respond with file stream', async () => {
         const response = await mocks.testServer.get('/controller')
         const homePage = await fs.promises.readFile(`${publicDir}/${controllerHTML}`)
+
         expect(response.text).toStrictEqual(homePage.toString())
     })
 
