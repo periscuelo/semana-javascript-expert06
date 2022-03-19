@@ -50,4 +50,6 @@ test.pipeAndReadStreamData = (stream, onChunk) => {
     return stream.pipe(transform)
 }
 
+test.testServer = superTest(Server())
+
 export default test
