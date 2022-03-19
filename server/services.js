@@ -23,16 +23,16 @@ const {
 
 const srv = {}
 
-const clientStreams = new Map()
-const currentSong = englishConversation
-
-let currentBitRate = 0
-let currentReadable, throttleTransform
+srv.clientStreams = new Map()
+srv.currentBitRate = 0
+srv.currentReadable = ''
+srv.currentSong = englishConversation
+srv.throttleTransform = ''
 
 srv.createClientStream = () => {
     const id = randomUUID()
     const clientStream = new PassThrough()
-    clientStreams.set(id, clientStream)
+    srv.clientStreams.set(id, clientStream)
 
     return {
         id,
@@ -41,7 +41,7 @@ srv.createClientStream = () => {
 }
 
 srv.removeClientStream = id => {
-    clientStreams.delete(id)
+    srv.clientStreams.delete(id)
 }
 
 srv._executeSoxCommand = args => spawn('sox', args)
@@ -75,9 +75,9 @@ srv.getBitRate = async song => {
 srv.broadCast = () => {
     return new Writable({
         write: (chunk, enc, cb) => {
-            for (const [id, stream] of clientStreams) {
+            for (const [id, stream] of srv.clientStreams) {
                 if (stream.writableEnded) {
-                    clientStreams.delete(id)
+                    srv.clientStreams.delete(id)
                     continue
                 }
 
@@ -90,21 +90,21 @@ srv.broadCast = () => {
 }
 
 srv.startStreamming = async () => {
-    logger.info(`starting with ${currentSong}`)
+    logger.info(`starting with ${srv.currentSong}`)
 
-    currentBitRate = (await srv.getBitRate(currentSong)) / bitRateDivisor
-    currentReadable = srv.createFileStream(currentSong)
-    throttleTransform = new Throttle(currentBitRate)
+    srv.currentBitRate = (await srv.getBitRate(srv.currentSong)) / bitRateDivisor
+    srv.currentReadable = srv.createFileStream(srv.currentSong)
+    srv.throttleTransform = new Throttle(srv.currentBitRate)
 
     return streamPromises.pipeline(
-        currentReadable,
-        throttleTransform,
+        srv.currentReadable,
+        srv.throttleTransform,
         srv.broadCast()
     )
 }
 
 srv.stopStreamming = () => {
-    throttleTransform?.end?.()
+    srv.throttleTransform?.end?.()
 }
 
 srv.createFileStream = file => fs.createReadStream(file)
