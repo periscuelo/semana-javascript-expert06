@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 import { jest } from '@jest/globals'
 import { Readable, Writable } from 'stream'
 
@@ -19,7 +18,7 @@ test.generateReadableStream = data => {
 test.generateWritableStream = onData => {
     return new Writable({
         write(chunk, enc, cb) {
-            onData(chunk)
+            onData?.(chunk)
 
             cb(null, chunk)
         }
@@ -28,7 +27,7 @@ test.generateWritableStream = onData => {
 
 test.defaultHandleParams = () => {
     const reqStream = test.generateReadableStream(['body da requisição'])
-    const resStream = test.generateWritableStream(() => {})
+    const resStream = test.generateWritableStream()
 
     const data = {
         req: {
