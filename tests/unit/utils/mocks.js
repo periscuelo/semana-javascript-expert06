@@ -49,4 +49,10 @@ test.defaultHandleParams = () => {
     }
 }
 
+test.getSpawnResponse = ({ stdout = '', stderr = '', stdin = () => {} }) => ({
+    stdout: test.generateReadableStream([stdout]),
+    stderr: test.generateReadableStream([stderr]),
+    stdin: test.generateWritableStream(stdin)
+})
+
 export default test
