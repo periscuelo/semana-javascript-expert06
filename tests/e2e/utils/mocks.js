@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 import { Transform } from 'stream'
 
 import superTest from 'supertest'
@@ -15,12 +14,12 @@ test.getTestServer = async () => {
     const port = await getAvailablePort()
 
     return new Promise((resolve, reject) => {
-        Server.listen(port).once('listening', () => {
+        const server = Server().listen(port).once('listening', () => {
             const testServer = getSuperTest(port)
             const res = {
                 testServer,
                 kill() {
-                    Server.close()
+                    server.close()
                 }
             }
 
