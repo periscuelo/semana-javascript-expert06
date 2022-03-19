@@ -45,7 +45,7 @@ const routes = async (req, res) => {
         req.once('close', onClose)
         res.writeHead(200, {
             'Content-Type': 'audio/mpeg',
-            'Accept-Rages': 'bytes'
+            'Accept-Ranges': 'bytes'
         })
 
         return stream.pipe(res)
