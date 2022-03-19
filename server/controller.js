@@ -22,6 +22,8 @@ controller.handleCommand = async ({ command }) => {
         services.stopStreamming()
         return result
     }
+
+    return false
 }
 
 controller.createClientStream = () => {
