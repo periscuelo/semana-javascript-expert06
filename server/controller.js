@@ -25,6 +25,11 @@ controller.handleCommand = async ({ command }) => {
         return result
     }
 
+    const chosenFx = await services.readFxByName(cmd)
+    logger.info(`added fx to service ${chosenFx}`)
+
+    services.appendFxStream(chosenFx)
+
     return result
 }
 

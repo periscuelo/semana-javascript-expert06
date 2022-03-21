@@ -6,18 +6,21 @@ import Throttle from 'throttle'
 import { spawn } from 'child_process'
 import { randomUUID } from 'crypto'
 import { PassThrough, Writable } from 'stream'
-import { extname, join } from 'path'
+import path, { extname, join } from 'path'
 import { once } from 'events'
 import { logger } from './utils.js'
 
 import config from './config.js'
 
 const {
-    dir: { publicDir },
+    dir: { publicDir, fxDir },
     constants: {
         bitRateDivisor,
         fallbackBitRate,
-        englishConversation
+        englishConversation,
+        audioMediaType,
+        songVolume,
+        fxVolume
     }
 } = config
 
@@ -128,6 +131,68 @@ srv.getFileStream = async file => {
         stream: srv.createFileStream(name),
         type
     }
+}
+
+srv.readFxByName = async fxName => {
+    const songs = await fsPromises.readdir(fxDir)
+    const chosenSong = songs.find(fileName => fileName.toLowerCase().includes(fxName))
+
+    if (!chosenSong) return Promise.reject(`The song ${fxName} wasn't found!`)
+
+    return path.join(fxDir, chosenSong)
+}
+
+srv.appendFxStream = fx => {
+    streamPromises.pipeline(
+        srv.throttleTransform,
+        srv.broadCast()
+    )
+
+    const unpipe = () => {
+        const transformStream = srv.mergeAudioStreams(fx, srv.currentReadable)
+        srv.currentReadable = transformStream
+        srv.currentReadable.removeListener('unpipe', unpipe)
+
+        streamPromises.pipeline(
+            transformStream,
+            srv.throttleTransform
+        )
+    }
+
+    srv.throttleTransform.on('unpipe', unpipe)
+    srv.throttleTransform.pause()
+    srv.currentReadable.unpipe(srv.throttleTransform)
+}
+
+srv.mergeAudioStreams = (song, readable) => {
+    const transformStream = new PassThrough()
+    const args = [
+        '-t', audioMediaType,
+        '-v', songVolume,
+        '-m', '-',
+        '-t', audioMediaType,
+        '-v', fxVolume,
+        song,
+        '-t', audioMediaType,
+        '-'
+    ]
+
+    const {
+        stdout,
+        stdin
+    } = srv._executeSoxCommand(args)
+
+    streamPromises.pipeline(
+        readable,
+        stdin
+    ).catch(error => logger.error(`error on sending stream to sox: ${error}`))
+
+    streamPromises.pipeline(
+        stdout,
+        transformStream
+    ).catch(error => logger.error(`error on receiving stream from sox: ${error}`))
+
+    return transformStream
 }
 
 export default srv
