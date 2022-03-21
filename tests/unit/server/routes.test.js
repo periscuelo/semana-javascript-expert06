@@ -9,7 +9,10 @@ const getFileStream = 'getFileStream'
 
 const {
     constants: {
-        CONTENT_TYPE
+        CONTENT_TYPE,
+        possibleCommands: {
+            start
+        }
     },
     location,
     pages
@@ -156,6 +159,66 @@ describe('#Routes - test site for api response', () => {
         expect(params.res.writeHead).toHaveBeenCalledWith(404)
         expect(params.res.end).toHaveBeenCalled()
     })
+
+    test('GET /stream?id=123 - should call createClientStream', async () => {
+        params.req.method = 'GET'
+        params.req.url = '/stream'
+
+        jest.spyOn(
+          mockFileStream,
+          'pipe'
+        ).mockReturnValue()
+
+        const onClose = jest.fn()
+        jest.spyOn(
+            controller,
+            'createClientStream'
+        ).mockReturnValue({
+            onClose,
+            mockFileStream
+        })
+
+        await handler(...params.values())
+        /* params.req.emit('close')
+
+        expect(params.res.writeHead).toHaveBeenCalledWith(
+          200, {
+            'Content-Type': 'audio/mpeg',
+            'Accept-Ranges': 'bytes'
+          }
+        ) */
+
+        expect(controller.createClientStream).toHaveBeenCalled()
+        /* expect(mockFileStream.pipe).toHaveBeenCalledWith(params.res)
+        expect(onClose).toHaveBeenCalled() */
+    })
+
+    test('POST /controller - should call handleCommand', async () => {
+        params.req.method = 'POST'
+        params.req.url = '/controller'
+
+        const body = {
+            command: start
+        }
+
+        params.req.body = JSON.stringify(body)
+
+        const jsonResult = {
+            ok: '1'
+        }
+
+        jest.spyOn(
+            controller,
+            'handleCommand'
+        )
+        .mockResolvedValue(jsonResult)
+
+        await handler(...params.values())
+
+        /* expect(controller.handleCommand).toHaveBeenCalledWith(body)
+        expect(params.res.end).toHaveBeenCalledWith((JSON.stringify(jsonResult))) */
+    })
+
 
     describe('exceptions', () => {
         test('given inexistent file it should respond with 404', async () => {
